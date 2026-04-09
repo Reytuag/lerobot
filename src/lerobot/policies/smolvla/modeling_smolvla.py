@@ -241,6 +241,7 @@ class SmolVLAPolicy(PreTrainedPolicy):
         super().__init__(config)
         config.validate_features()
         self.config = config
+        
         self.init_rtc_processor()
         self.model = VLAFlowMatching(config, rtc_processor=self.rtc_processor)
         self.reset()
@@ -287,7 +288,7 @@ class SmolVLAPolicy(PreTrainedPolicy):
         lang_tokens = batch[f"{OBS_LANGUAGE_TOKENS}"]
         lang_masks = batch[f"{OBS_LANGUAGE_ATTENTION_MASK}"]
 
-        actions = self.model.sample_actions(
+        embed,actions = self.model.sample_actions(
             images, img_masks, lang_tokens, lang_masks, state, noise=noise, **kwargs
         )
 
@@ -298,7 +299,7 @@ class SmolVLAPolicy(PreTrainedPolicy):
         if self.config.adapt_to_pi_aloha:
             actions = self._pi_aloha_encode_actions(actions)
 
-        return actions
+        return embed[0],actions
 
     def _prepare_batch(self, batch: dict[str, Tensor]) -> dict[str, Tensor]:
         if self.config.adapt_to_pi_aloha:
@@ -336,13 +337,14 @@ class SmolVLAPolicy(PreTrainedPolicy):
         self.eval()
         batch = self._prepare_batch(batch)
         self._queues = populate_queues(self._queues, batch, exclude_keys=[ACTION])
-
+        embed=None
         if self._check_get_actions_condition():
-            actions = self._get_action_chunk(batch, noise)
 
+            embed,actions = self._get_action_chunk(batch, noise)
             # `self.predict_action_chunk` returns a (batch_size, n_action_steps, action_dim) tensor, but the queue
             # effectively has shape (n_action_steps, batch_size, *), hence the transpose.
             self._queues[ACTION].extend(actions.transpose(0, 1)[: self.config.n_action_steps])
+            
 
         return self._queues[ACTION].popleft()
 
@@ -822,7 +824,7 @@ class VLAFlowMatching(nn.Module):
         prefix_att_2d_masks = make_att_2d_masks(prefix_pad_masks, prefix_att_masks)
         prefix_position_ids = torch.cumsum(prefix_pad_masks, dim=1) - 1
         # Compute image and language key value cache
-        _, past_key_values = self.vlm_with_expert.forward(
+        embed, past_key_values = self.vlm_with_expert.forward(
             attention_mask=prefix_att_2d_masks,
             position_ids=prefix_position_ids,
             past_key_values=None,
@@ -830,6 +832,7 @@ class VLAFlowMatching(nn.Module):
             use_cache=self.config.use_cache,
             fill_kv_cache=True,
         )
+        # print(embed[0].shape,prefix_att_2d_masks.shape)
         num_steps = self.config.num_steps
         dt = -1.0 / num_steps
 
@@ -867,7 +870,7 @@ class VLAFlowMatching(nn.Module):
             if self.rtc_processor is not None and self.rtc_processor.is_debug_enabled():
                 self.rtc_processor.track(time=time, x_t=x_t, v_t=v_t)
 
-        return x_t
+        return embed,x_t
 
     def denoise_step(
         self,

@@ -102,7 +102,7 @@ class LiberoEnv(gym.Env):
         task_suite: Any,
         task_id: int,
         task_suite_name: str,
-        episode_length: int | None = None,
+        episode_length: int | None =280,
         camera_name: str | Sequence[str] = "agentview_image,robot0_eye_in_hand_image",
         obs_type: str = "pixels",
         render_mode: str = "rgb_array",
@@ -144,6 +144,8 @@ class LiberoEnv(gym.Env):
         self.num_steps_wait = num_steps_wait
         self.episode_index = episode_index
         self.episode_length = episode_length
+        self.episode_length = 160
+        self.current_step = 0
         # Load once and keep
         self._init_states = get_task_init_states(task_suite, self.task_id) if self.init_states else None
         self._reset_stride = n_envs  # when performing a reset, append `_reset_stride` to `init_state_id`.
@@ -317,6 +319,7 @@ class LiberoEnv(gym.Env):
             raise ValueError(f"Invalid control mode: {self.control_mode}")
         observation = self._format_raw_obs(raw_obs)
         info = {"is_success": False}
+        self.current_step = 0
         return observation, info
 
     def step(self, action: np.ndarray) -> tuple[RobotObservation, float, bool, bool, dict[str, Any]]:
@@ -338,14 +341,30 @@ class LiberoEnv(gym.Env):
             }
         )
         observation = self._format_raw_obs(raw_obs)
+        self.current_step += 1
         if terminated:
+            print(self.current_step)
             info["final_info"] = {
                 "task": self.task,
                 "task_id": self.task_id,
+                "steps_taken": self.current_step,
                 "done": bool(done),
                 "is_success": bool(is_success),
             }
             self.reset()
+        elif(self.episode_length is not None and self.current_step >= self.episode_length):
+            terminated = True
+            print("max episode length reached, resetting the environment")
+            info["final_info"] = {
+                "task": self.task,
+                "task_id": self.task_id,
+                "steps_taken": self.current_step,
+                "done": bool(done),
+                "is_success": bool(is_success),
+                "reason": "max_episode_length_reached",
+            }
+            self.reset()
+
         truncated = False
         return observation, reward, terminated, truncated, info
 
