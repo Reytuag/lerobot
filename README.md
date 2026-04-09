@@ -1,12 +1,22 @@
-** Fork of lerobot to try quick implementation of papers to experiment**
+# Fork of lerobot to try quick implementation of papers to experiment*
 
-For now, implementation of RLT from physical intelligence ([blogpost](https://www.pi.website/research/rlt) ) for libero. Including training of the RL embedding encoder and RL training of the action critic with TD3. For now the implementation only include training of smolVLA on libero. Quickly testing it we get from 60% success rate on a libero task (libero spatial 4) to more than 80%. This results were obtained without human expert correction as opposed to the base work, which should greatly increase the performances. The current implementation only steer the base policy toward more precise movements.
+## RLT
+
+For now, implementation of RLT from physical intelligence ([blogpost](https://www.pi.website/research/rlt) ) for libero. Including training of the RL embedding encoder and RL training of the action critic with TD3. For now the implementation only include training of smolVLA on libero. Quickly testing it we get from 60% success rate on a libero task (libero spatial 4) to more than 80% (see figure below). This results were obtained without human expert correction as opposed to the RLT paper. Adding this expert correction should greatly increase the performances, especially if thore are targeted toward failure modes. The current implementation only steer the base policy toward more precise movements.
+
+
 
 <div align="center">
   <img src="./media/readme/libero_smolVLA_task4_spatial.gif" width="256px" alt="smolvla libero spatial 4">
+  <img src="./media/readme/rlt_smolVLA_libero_spatial_4.jpg" height="256px" alt="rlt training curve">
 </div>
 
 <div align="center">
+
+
+
+
+# Original readme 
 
 [![Tests](https://github.com/huggingface/lerobot/actions/workflows/nightly.yml/badge.svg?branch=main)](https://github.com/huggingface/lerobot/actions/workflows/nightly.yml?query=branch%3Amain)
 [![Python versions](https://img.shields.io/pypi/pyversions/lerobot)](https://www.python.org/downloads/)
