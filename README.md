@@ -2,7 +2,7 @@
 
 ## RLT
 
-For now, implementation of RLT from physical intelligence ([blogpost](https://www.pi.website/research/rlt) ) for libero. Including training of the RL embedding encoder and RL training of the action critic with TD3. For now the implementation only include training of smolVLA on libero. Quickly testing it we get from 60% success rate on a libero task (libero spatial 4) to more than 80% (see figure below). This results were obtained without human expert correction as opposed to the RLT paper. Adding this expert correction should greatly increase the performances, especially if thore are targeted toward failure modes. The current implementation only steer the base policy toward more precise movements.
+For now, implementation of RLT from physical intelligence ([blogpost](https://www.pi.website/research/rlt) ) for libero. Including training of the RL embedding encoder and RL training of the action critic with TD3. For now the implementation only include training of smolVLA on libero. Quickly testing it we get from 60% success rate on a libero task (libero spatial 4) to more than 80% (see figure below). This results were obtained without human expert correction as opposed to the RLT paper. Adding this expert correction should greatly increase the performances, especially if thore are targeted toward failure modes. The current implementation only steer the base policy toward more precise movements. Another thing to consider is that smolVLA does not train the VLM and keep it freezed during training of the action expert. This might make the VLM embedding and hence the RL embedding potentially less aligned with the RL training compared to other VLA. 
 
 
 
