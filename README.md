@@ -2,11 +2,9 @@
 
 For now, implementation of RLT from physical intelligence ([blogpost](https://www.pi.website/research/rlt) ) for libero. Including training of the RL embedding encoder and RL training of the action critic with TD3. For now the implementation only include training of smolVLA on libero. Quickly testing it we get from 60% success rate on a libero task (libero spatial 4) to more than 80%. This results were obtained without human expert correction as opposed to the base work, which should greatly increase the performances. The current implementation only steer the base policy toward more precise movements.
 
-
-
-<p align="center">
-  <img alt="LeRobot, Hugging Face Robotics Library" src="./media/readme/lerobot-logo-thumbnail.png" width="100%">
-</p>
+<div align="center">
+  <img src="./media/readme/libero_smolVLA_task4_spatial.gif" width="256px" alt="smolvla libero spatial 4">
+</div>
 
 <div align="center">
 
